@@ -255,13 +255,13 @@ Example based on the AR.js library and examples created by Jerome Etienne: https
             render();
         }
 
-        window.onload = () => {
-            setTimeout(() => {
-                for (let i = 0; i < audioContent.length; i++) {
-                    audioContent[i].play();
-                }
-            }, 100);
-        }
+        const playAudioContent = () => {
+            window.removeEventListener('touchstart', playAudioContent);
+            for (let i = 0; i < audioContent.length; i++) {
+                audioContent[i].play();
+            }
+        };
+        window.addEventListener('touchstart', playAudioContent)
 
     </script>
 
