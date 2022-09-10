@@ -2,7 +2,7 @@
 
 <head>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>AR project template</title>
+    <title>AR Page</title>
     <!-- Main libraries -->
     <script src="js/three.js"></script>
     <script src="js/tween.umd.js"></script>
@@ -76,6 +76,8 @@
             let patternsID = [];
 
             let controller;
+
+            var mixer = undefined;
 
             // Initializing the scene and animation
             initialize();
@@ -162,13 +164,13 @@
                 // Array for .glb or .gltf model file names
                 const modelFiles = ["", "", "", "butterfly.glb"];
                 // Array for image file names
-                const imageFiles = ["", "sintel.mp4", "mountain.png", ""];
+                const imageFiles = ["", "sintel.mp4 ", "mountain.png", ""];
                 // Array for video file names
                 const videoFiles = ["", "", "", ""];
                 // Array for audio file names
                 const audioFiles = ["", "", "", ""];
                 // Array for autoplay option
-                const repeatOptions = ["false", "true", "false", "false"];
+                const repeatOptions = ["false", "true", "false", "true"];
 
                 // Creating separate group for every marker
                 const markerRoots = [];
@@ -203,12 +205,18 @@
                             contentPromises.push(new Promise((resolve) => {
                                 // Creating a loader for .glb or .gltf models
                                 const test = new THREE.GLTF2Loader().load(`${modelFiles[i]}`, (response) => {
+                                    const animations = response.animations;
+                                    mixer = new THREE.AnimationMixer(response.scene);
+                                    const animation = mixer.clipAction(animations[0]);
+                                    animation.play()
+
                                     const scene = response.scene;
                                     const object = scene.children[0];
                                     // Sometimes we can not see our model because it is too large on the scene or too small
                                     // For more info read: https://threejs.org/docs/index.html#manual/en/introduction/Loading-3D-models
                                     // Here we scale it down to see it on scene for sure. You can remove this scale if needed
-                                    object.scale.set(0.01, 0.01, 0.01);
+                                    object.scale.set(10, 10, 10);
+                                    object.rotation.z += Math.PI;
                                     // You can adjust the position and rotation of your model also, play with it
                                     // object.position.set(0, Math.PI / 2, Math.PI / 4);
                                     // object.rotation.set(0, Math.PI / 2, Math.PI / 4);
@@ -250,10 +258,10 @@
                         case 'video':
                             // Creating plane for video canvas, canvas should be adjusted for the video dimensions
                             // Currently this is 16:9 video dimension
-                            let geometry2 = new THREE.PlaneBufferGeometry(1.6, 0.9);
+                            let geometry2 = new THREE.PlaneBufferGeometry(2.4, 1.01);
                             // Creating html video element
                             let video = document.createElement('video');
-                            video.src = `${videoFiles[i]}`;
+                            video.src = videoFiles[i];
                             video.playsInline = true;
                             // Setting the autoplay if needed
                             if (repeatOptions[i]) {
@@ -421,6 +429,7 @@
                 requestAnimationFrame(animate);
                 deltaTime = clock.getDelta();
                 totalTime += deltaTime;
+                mixer?.update(deltaTime);
                 rotationGroup.rotation.y += deltaTime;
                 update();
                 checkController();
